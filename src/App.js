@@ -11,6 +11,10 @@ function App() {
     fullName: "",
   });
 
+  const [editFormData, setEditFormData] = useState({
+    fullName: "",
+  });
+
   const [editNameId, setEditNameId] = useState(null);
 
   const handleAddFormChange = (event) => {
@@ -25,6 +29,18 @@ function App() {
     setAddFromData(newFormData);
   };
 
+  const handleEditFormChange = (event) => {
+    event.preventDefault();
+
+    const fieldName = event.target.getAttribute("name");
+    const fieldValue = event.target.value;
+
+    const newFormData = { ...editFormData };
+    newFormData[fieldName] = fieldValue;
+
+    setEditFormData(newFormData);
+  };
+
   const handleAddFormSubmit = (event) => {
     event.preventDefault();
 
@@ -36,14 +52,48 @@ function App() {
     setNames(newNames);
   };
 
+  const handleEditFormSubmit = (event) => {
+    event.preventDefault();
+
+    const editedName = {
+      id: editNameId,
+      fullName: editFormData.fullName,
+    };
+    const newNames = [...names];
+    const index = names.findIndex((name) => name.id === editNameId);
+    newNames[index] = editedName;
+
+    setNames(newNames);
+    setEditNameId(null);
+  };
+
   const handleEditClick = (event, name) => {
     event.preventDefault();
     setEditNameId(name.id);
+
+    const formValues = {
+      fullName: name.fullName,
+    };
+    setEditFormData(formValues);
   };
+
+  const handleCancleClick =() =>{
+    setEditNameId(null);
+  }
+
+  const handleDeleteClick = (nameId) =>{
+    const newNames = [...names]
+
+    const index = names.findIndex((name) => name.id === nameId);
+
+    newNames.splice(index,1);
+
+    setNames(newNames);
+  }
 
   return (
     <div className="app-container">
-      <form>
+      <form onSubmit={handleEditFormSubmit}>
         <table>
           <thead>
             <tr>
@@ -55,9 +105,16 @@ function App() {
             {names.map((name) => (
               <Fragment>
                 {editNameId === name.id ? (
-                  <EditableRow />
+                  <EditableRow
+                    editFormData={editFormData}
+                    handleEditFormChange={handleEditFormChange}
+                    handleCancleClick={handleCancleClick}
+                  />
                 ) : (
-                  <ReadOnlyRow name={name} handleEditClick={handleEditClick}/>
+                  <ReadOnlyRow name={name}
+                   handleEditClick={handleEditClick}
+                   handleDeleteClick={handleDeleteClick}
+                   />
                 )}
               </Fragment>
             ))}
